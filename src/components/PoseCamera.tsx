@@ -25,9 +25,11 @@ type Status = "idle" | "loading" | "running" | "error";
 
 export function PoseCamera({
   onLandmarks,
+  onRunningChange,
   children,
 }: {
-  onLandmarks: (lms: Landmark[] | null) => void;
+  onLandmarks: (lms: Landmark[] | null, aspect: number) => void;
+  onRunningChange?: (running: boolean) => void;
   children?: React.ReactNode;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -37,6 +39,8 @@ export function PoseCamera({
   const rafRef = useRef<number>(0);
   const onLmRef = useRef(onLandmarks);
   onLmRef.current = onLandmarks;
+  const onRunRef = useRef(onRunningChange);
+  onRunRef.current = onRunningChange;
 
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +53,7 @@ export function PoseCamera({
     if (videoRef.current) videoRef.current.srcObject = null;
     const ctx = canvasRef.current?.getContext("2d");
     if (ctx && canvasRef.current) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    onLmRef.current(null);
+    onLmRef.current(null, 1);
     setStatus("idle");
   }, []);
 
@@ -117,12 +121,16 @@ export function PoseCamera({
         const result = lm.detectForVideo(video, performance.now());
         const pose = result.landmarks[0] ?? null;
         draw(canvas, pose);
-        onLmRef.current(pose);
+        onLmRef.current(pose, video.videoWidth / Math.max(video.videoHeight, 1));
       }
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
   };
+
+  useEffect(() => {
+    onRunRef.current?.(status === "running");
+  }, [status]);
 
   useEffect(() => () => {
     cancelAnimationFrame(rafRef.current);
