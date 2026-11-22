@@ -261,6 +261,7 @@ function GamePage() {
       }, 100);
       return () => clearInterval(iv);
     }
+    return undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [challenge]);
 

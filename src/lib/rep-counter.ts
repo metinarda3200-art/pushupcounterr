@@ -88,7 +88,7 @@ export function step(
   t: Thresholds,
 ): { state: CounterState; event: RepEvent } {
   const s = { ...state };
-  let event: RepEvent = null;
+  let event = null as RepEvent;
 
   if (!f.inPose) {
     if (s.armed && f.t - s.lastInPose > t.maxOutOfPoseMs) {

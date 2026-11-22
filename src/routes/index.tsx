@@ -1,280 +1,101 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useRef, useState } from "react";
-import { RotateCcw, ScanLine, TriangleAlert } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Camera, Flame, Medal, PlayCircle, ScanLine, Timer } from "lucide-react";
 
-import { PoseCamera } from "@/components/PoseCamera";
+import heroImg from "@/assets/hero-pushup.jpg";
 import { Button } from "@/components/ui/button";
-import { computeMetrics, type Landmark } from "@/lib/pose-metrics";
-import {
-  THRESHOLDS,
-  formatCount,
-  initialState,
-  step,
-  type CounterState,
-  type Exercise,
-  type RepEvent,
-} from "@/lib/rep-counter";
+import { RankBadge } from "@/components/game/RankBadge";
+import { AnimatedSkeleton } from "@/components/site/AnimatedSkeleton";
+import { TIERS } from "@/lib/game";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Tekrar — Yapay Zekâ ile Şınav ve Barfiks Sayacı" },
-      {
-        name: "description",
-        content:
-          "Kameranla şınav ve barfiks tekrarlarını yapay zekâ sayar. İskelet takibi, hareket aralığı kontrolü ve 0,5 yarım tekrar.",
-      },
+      { name: "description", content: "Kameranı aç, yapay zekâ şınav ve barfiks tekrarlarını hareket aralığına göre saysın. XP kazan, rank atla, sıralamaya gir." },
       { property: "og:title", content: "Tekrar — Yapay Zekâ ile Şınav ve Barfiks Sayacı" },
-      {
-        property: "og:description",
-        content: "Kamerada iskelet takibiyle şınav ve barfiks tekrarlarını hareket aralığına göre say.",
-      },
+      { property: "og:description", content: "Her tekrar sayılır, hilesi yok. Bronzdan Şampiyona yüksel." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Index,
+  component: Home,
 });
 
-const LABELS: Record<Exercise, string> = { pushup: "Şınav", pullup: "Barfiks" };
+const WORDS = ["Şınav", "Barfiks", "0,5 yarım tekrar", "Combo", "Elmas", "Şampiyon", "60 sn meydan okuma"];
 
-type Live = {
-  angle: number | null;
-  bodyVisible: boolean;
-  tracking: boolean;
-  phase: CounterState["phase"];
-  armed: boolean;
-};
-
-function Index() {
-  const [active, setActive] = useState<Exercise>("pushup");
-  const [counts, setCounts] = useState<Record<Exercise, number>>({ pushup: 0, pullup: 0 });
-  const [flash, setFlash] = useState<{ ex: Exercise; ev: Exclude<RepEvent, null>; id: number } | null>(null);
-  const [live, setLive] = useState<Live>({ angle: null, bodyVisible: false, tracking: false, phase: "up", armed: false });
-
-  const counters = useRef<Record<Exercise, CounterState>>({ pushup: initialState(), pullup: initialState() });
-  const smooth = useRef<number | null>(null);
-  const activeRef = useRef(active);
-  activeRef.current = active;
-  const lastUi = useRef(0);
-
-  const onLandmarks = useCallback((lms: Landmark[] | null) => {
-    const ex = activeRef.current;
-    if (!lms) {
-      smooth.current = null;
-      setLive((l) => ({ ...l, tracking: false, angle: null }));
-      return;
-    }
-    const m = computeMetrics(lms, ex);
-    if (m.angle !== null) {
-      smooth.current = smooth.current === null ? m.angle : smooth.current * 0.5 + m.angle * 0.5;
-      const { state, event } = step(counters.current[ex], smooth.current, THRESHOLDS[ex]);
-      counters.current[ex] = state;
-      if (event) {
-        setCounts((c) => ({ ...c, [ex]: state.count }));
-        setFlash({ ex, ev: event, id: performance.now() });
-      }
-    }
-    const now = performance.now();
-    if (now - lastUi.current > 80) {
-      lastUi.current = now;
-      const s = counters.current[ex];
-      setLive({
-        angle: smooth.current,
-        bodyVisible: m.bodyVisible,
-        tracking: true,
-        phase: s.phase,
-        armed: s.armed,
-      });
-    }
-  }, []);
-
-  const select = (ex: Exercise) => {
-    setActive(ex);
-    smooth.current = null;
-    // re-arm so the new exercise waits for a clean start position
-    counters.current[ex] = { ...initialState(), count: counters.current[ex].count };
-  };
-
-  const reset = (ex: Exercise) => {
-    counters.current[ex] = initialState();
-    setCounts((c) => ({ ...c, [ex]: 0 }));
-  };
-
+function Home() {
   return (
-    <main className="mx-auto flex max-w-5xl flex-col gap-5 px-4 pb-12 pt-6 sm:px-6 sm:pt-10">
-      <header className="flex items-end justify-between gap-4">
-        <div>
-          <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.25em] text-ember">
-            <ScanLine className="size-3.5" /> Yapay zekâ form takibi
-          </p>
-          <h1 className="text-stencil mt-2 text-5xl text-bone sm:text-7xl">Tekrar</h1>
+    <main className="animate-page-in">
+      <section className="relative overflow-hidden">
+        <img src={heroImg} alt="Karanlık salonda şınav çeken sporcu" className="absolute inset-0 h-full w-full object-cover object-right opacity-70" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/10" />
+        <div className="relative mx-auto grid max-w-6xl gap-8 px-4 py-16 sm:px-6 md:grid-cols-[1.3fr_1fr] md:py-24">
+          <div>
+            <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.25em] text-ember">
+              <ScanLine className="size-3.5" /> Yapay zekâ form takibi
+            </p>
+            <h1 className="text-stencil mt-4 text-6xl text-bone sm:text-8xl">
+              Her tekrar <span className="text-gradient-ember">sayılır.</span>
+            </h1>
+            <p className="mt-5 max-w-md text-lg text-muted-foreground">
+              Kameranı aç, yapay zekâ iskeletini takip etsin. Tam tekrar 1, yarım tekrar 0,5. Hilesi yok.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button asChild variant="ember" size="xl">
+                <Link to="/oyun"><Camera /> Oyuna başla</Link>
+              </Button>
+              <Button asChild variant="hud" size="xl">
+                <Link to="/form"><PlayCircle /> Doğru formu öğren</Link>
+              </Button>
+            </div>
+          </div>
+          <div className="surface-glass self-end rounded-2xl p-4 text-bone">
+            <AnimatedSkeleton />
+          </div>
         </div>
-        <p className="hidden max-w-xs text-right text-sm text-muted-foreground sm:block">
-          Tam hareket aralığı = 1 tekrar. Yarım iniş ya da yarım çekiş = 0,5.
-        </p>
-      </header>
+      </section>
 
-      <section className="grid grid-cols-2 gap-3 sm:gap-4" aria-label="Egzersizler">
-        {(["pushup", "pullup"] as const).map((ex) => (
-          <CountBox
-            key={ex}
-            exercise={ex}
-            count={counts[ex]}
-            active={active === ex}
-            flash={flash?.ex === ex ? flash : null}
-            onSelect={() => select(ex)}
-            onReset={() => reset(ex)}
-          />
+      <div className="overflow-hidden border-y border-border bg-surface py-3">
+        <div className="flex w-max animate-marquee gap-10">
+          {[...WORDS, ...WORDS].map((w, i) => (
+            <span key={i} className="text-stencil text-2xl text-muted-foreground">{w} <span className="text-ember">•</span></span>
+          ))}
+        </div>
+      </div>
+
+      <section className="mx-auto grid max-w-6xl gap-4 px-4 py-14 sm:px-6 md:grid-cols-3">
+        {[
+          { icon: Camera, title: "Kamerayı yana koy", text: "Baş, gövde ve bacaklar görünsün. Beyaz iskelet noktaları üstünde belirir." },
+          { icon: Flame, title: "Combo yap", text: "Art arda tam tekrarlar XP'ni katlar. Yarım tekrar combo'yu bozar." },
+          { icon: Timer, title: "60 sn meydan okuma", text: "Süre içinde en çok tekrarı çek, rekorunu kır." },
+        ].map((f, i) => (
+          <div key={f.title} className={`animate-page-in delay-${i + 1} rounded-2xl border border-border bg-surface p-5 transition-transform hover:-translate-y-1`}>
+            <f.icon className="size-6 text-ember" />
+            <p className="text-stencil mt-3 text-2xl text-bone">{f.title}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{f.text}</p>
+          </div>
         ))}
       </section>
 
-      <PoseCamera onLandmarks={onLandmarks}>
-        <Hud exercise={active} live={live} />
-      </PoseCamera>
-
-      <section className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
-        <Tip n="01" title="Yandan çek">
-          Kamerayı vücudunun yan tarafına, 2–3 metre uzağa yerleştir. Baş, gövde ve bacaklar görünmeli.
-        </Tip>
-        <Tip n="02" title="Kolları aç">
-          Sayım, kolların tam açık başlangıç pozisyonunu gördükten sonra başlar.
-        </Tip>
-        <Tip n="03" title="Aralığı tamamla">
-          Şınavda dirsek ~90°'ye in, barfikste çeneni barın üstüne çıkar. Yarısı 0,5 sayılır.
-        </Tip>
+      <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
+        <div className="rounded-3xl border border-border bg-surface p-6 sm:p-10">
+          <p className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-ember"><Medal className="size-4" /> Rank sistemi</p>
+          <h2 className="text-stencil mt-2 text-4xl text-bone sm:text-5xl">Bronzdan Şampiyona</h2>
+          <div className="mt-8 grid grid-cols-3 gap-4 sm:grid-cols-6">
+            {TIERS.map((t, i) => (
+              <div key={t.id} className="flex flex-col items-center text-center transition-transform hover:scale-110">
+                <RankBadge tier={t.id} size={72} glow={i >= 4} />
+                <p className="text-stencil mt-2 text-lg text-bone">{t.name}</p>
+                <p className="font-mono text-[10px] text-muted-foreground">{t.min.toLocaleString("tr-TR")} XP</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button asChild variant="ember"><Link to="/rank">Rankını gör</Link></Button>
+            <Button asChild variant="outline"><Link to="/siralama">Sıralama</Link></Button>
+          </div>
+        </div>
       </section>
     </main>
-  );
-}
-
-function CountBox({
-  exercise,
-  count,
-  active,
-  flash,
-  onSelect,
-  onReset,
-}: {
-  exercise: Exercise;
-  count: number;
-  active: boolean;
-  flash: { ev: "full" | "half"; id: number } | null;
-  onSelect: () => void;
-  onReset: () => void;
-}) {
-  const isPush = exercise === "pushup";
-  const tone = isPush ? "text-ember" : "text-volt";
-  const ring = isPush ? "border-ember shadow-[0_0_0_1px_var(--ember),0_20px_60px_-25px_var(--ember)]" : "border-volt shadow-[0_0_0_1px_var(--volt),0_20px_60px_-25px_var(--volt)]";
-
-  return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={onSelect}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect()}
-      aria-pressed={active}
-      aria-label={`${LABELS[exercise]} sayacı`}
-      className={`relative cursor-pointer overflow-hidden rounded-2xl border bg-surface p-4 text-left transition-all sm:p-6 ${
-        active ? ring : "border-border opacity-70 hover:opacity-100"
-      }`}
-    >
-      <div className="flex items-center justify-between">
-        <span className={`text-stencil text-xl sm:text-3xl ${active ? tone : "text-muted-foreground"}`}>
-          {LABELS[exercise]}
-        </span>
-        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          {active ? "● Sayılıyor" : "Seç"}
-        </span>
-      </div>
-
-      <div className="relative mt-3 flex items-baseline gap-2 sm:mt-6">
-        <span
-          key={flash?.id ?? "static"}
-          className={`text-stencil text-7xl tabular-nums text-bone sm:text-9xl ${flash ? "animate-rep-pop" : ""}`}
-          data-testid={`count-${exercise}`}
-        >
-          {formatCount(count)}
-        </span>
-        <span className="text-xs uppercase tracking-wider text-muted-foreground">tekrar</span>
-        {flash && (
-          <span key={`f-${flash.id}`} className={`text-stencil animate-float-up absolute -top-2 right-0 text-2xl ${tone}`}>
-            {flash.ev === "full" ? "+1" : "+0,5"}
-          </span>
-        )}
-      </div>
-
-      <Button
-        variant="ghost"
-        size="sm"
-        className="mt-2 -ml-2 text-muted-foreground"
-        onClick={(e) => {
-          e.stopPropagation();
-          onReset();
-        }}
-      >
-        <RotateCcw /> Sıfırla
-      </Button>
-    </div>
-  );
-}
-
-function Hud({ exercise, live }: { exercise: Exercise; live: Live }) {
-  const t = THRESHOLDS[exercise];
-  const isPush = exercise === "pushup";
-  const bar = isPush ? "bg-ember" : "bg-volt";
-  // 0% = arms straight, 100% = full range reached
-  const depth = live.angle === null ? 0 : Math.max(0, Math.min(1, (t.top + 15 - live.angle) / (t.top + 15 - t.bottom)));
-  const halfMark = (t.top + 15 - t.half) / (t.top + 15 - t.bottom);
-
-  let hint: string;
-  if (!live.tracking) hint = "Vücut aranıyor…";
-  else if (live.angle === null) hint = "Kollar görünmüyor";
-  else if (!live.armed) hint = isPush ? "Kolları düz aç" : "Bara asıl, kolları aç";
-  else if (live.phase === "up") hint = isPush ? "İn" : "Çek";
-  else if (live.phase === "descending") hint = isPush ? "Daha aşağı" : "Daha yukarı";
-  else hint = isPush ? "Yukarı it" : "Kontrollü in";
-
-  return (
-    <>
-      <div className="absolute left-3 top-3 flex flex-col gap-2">
-        <span className="rounded-md bg-scrim px-2.5 py-1 font-mono text-[11px] uppercase tracking-widest text-bone backdrop-blur-md">
-          {LABELS[exercise]} · {live.angle === null ? "--" : `${Math.round(live.angle)}°`}
-        </span>
-        {live.tracking && !live.bodyVisible && (
-          <span className="flex items-center gap-1.5 rounded-md bg-destructive/90 px-2.5 py-1 text-xs font-medium text-destructive-foreground">
-            <TriangleAlert className="size-3.5" /> Baş, gövde ve bacaklar kadrajda olsun
-          </span>
-        )}
-      </div>
-
-      <div className="absolute inset-x-3 bottom-3 rounded-xl bg-scrim p-3 backdrop-blur-md">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-stencil text-xl text-bone sm:text-2xl">{hint}</span>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Hareket aralığı</span>
-        </div>
-        <div className="relative h-2.5 overflow-hidden rounded-full bg-surface-raised">
-          <div className={`h-full ${bar} transition-[width] duration-100`} style={{ width: `${depth * 100}%` }} />
-          <div className="absolute inset-y-0 w-0.5 bg-bone/70" style={{ left: `${halfMark * 100}%` }} />
-        </div>
-        <div className="relative mt-1 flex justify-between font-mono text-[10px] text-muted-foreground">
-          <span>Başlangıç</span>
-          <span className="absolute -translate-x-1/2" style={{ left: `${halfMark * 100}%` }}>
-            0,5
-          </span>
-          <span>1</span>
-        </div>
-      </div>
-    </>
-  );
-}
-
-function Tip({ n, title, children }: { n: string; title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-xl border border-border bg-surface/60 p-4">
-      <p className="font-mono text-[11px] text-ember">{n}</p>
-      <p className="mt-1 font-semibold text-foreground">{title}</p>
-      <p className="mt-1">{children}</p>
-    </div>
   );
 }

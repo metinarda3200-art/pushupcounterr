@@ -10,11 +10,25 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as FormRouteImport } from './routes/form'
 import { Route as OyunRouteImport } from './routes/oyun'
+import { Route as RankRouteImport } from './routes/rank'
+import { Route as SiralamaRouteImport } from './routes/siralama'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FormRoute = FormRouteImport.update({
+  id: '/form',
+  path: '/form',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OyunRoute = OyunRouteImport.update({
@@ -22,31 +36,57 @@ const OyunRoute = OyunRouteImport.update({
   path: '/oyun',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RankRoute = RankRouteImport.update({
+  id: '/rank',
+  path: '/rank',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiralamaRoute = SiralamaRouteImport.update({
+  id: '/siralama',
+  path: '/siralama',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/form': typeof FormRoute
   '/oyun': typeof OyunRoute
+  '/rank': typeof RankRoute
+  '/siralama': typeof SiralamaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/form': typeof FormRoute
   '/oyun': typeof OyunRoute
+  '/rank': typeof RankRoute
+  '/siralama': typeof SiralamaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/form': typeof FormRoute
   '/oyun': typeof OyunRoute
+  '/rank': typeof RankRoute
+  '/siralama': typeof SiralamaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/oyun'
+  fullPaths: '/' | '/auth' | '/form' | '/oyun' | '/rank' | '/siralama'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/oyun'
-  id: '__root__' | '/' | '/oyun'
+  to: '/' | '/auth' | '/form' | '/oyun' | '/rank' | '/siralama'
+  id: '__root__' | '/' | '/auth' | '/form' | '/oyun' | '/rank' | '/siralama'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  FormRoute: typeof FormRoute
   OyunRoute: typeof OyunRoute
+  RankRoute: typeof RankRoute
+  SiralamaRoute: typeof SiralamaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +98,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/form': {
+      id: '/form'
+      path: '/form'
+      fullPath: '/form'
+      preLoaderRoute: typeof FormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/oyun': {
       id: '/oyun'
       path: '/oyun'
@@ -65,12 +119,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OyunRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/rank': {
+      id: '/rank'
+      path: '/rank'
+      fullPath: '/rank'
+      preLoaderRoute: typeof RankRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/siralama': {
+      id: '/siralama'
+      path: '/siralama'
+      fullPath: '/siralama'
+      preLoaderRoute: typeof SiralamaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  FormRoute: FormRoute,
   OyunRoute: OyunRoute,
+  RankRoute: RankRoute,
+  SiralamaRoute: SiralamaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
