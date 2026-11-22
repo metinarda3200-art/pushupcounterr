@@ -1,14 +1,18 @@
-# Welcome to your Lovable project
+# Pushupcounterr
+
+AI KULLANARAK ŞINAV VEYA BARFİKS ÇEKME SATISINI SAYCAZ BUNUN içinde web site oluşturcan iki ayrı kutu olucak mesela barfiks veya şınav yeri diye tek tke yazıcak yarım tekrarlarıda 0,5 diye falan yazicak kamera deteği tabikide olucak bacaklar gogus kafa kamerada olucak hareket aralıgı dikkate alınca kamerada iskelet gibi beyaz noktaler fln olcak üstümüzde bacak kafa fln siye
 
 This project was built with [Lovable](https://lovable.dev).
 
+**Live app**: https://pushupcounterr.lovable.app
+
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/bc9440ce-ad7c-40fd-9664-b4d3d81d4592).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +24,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
