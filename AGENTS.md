@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+
+- Rep counting lives in pure functions in `src/lib/rep-counter.ts` (angle thresholds + state machine) with tests beside it; keep camera/MediaPipe code out of it so the rules stay testable.
+- Pose detection runs fully in the browser with `@mediapipe/tasks-vision`, dynamically imported after a user click so SSR never loads it; wasm/model load from public CDNs, no backend.
